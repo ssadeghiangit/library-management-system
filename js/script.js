@@ -68,7 +68,7 @@ function getCurrentUser() {
         const bookCard = document.createElement('div');
 
         bookCard.classList.add('card');
-        //last two line needs rewiew
+       
 
         const bookTitle = document.createElement('h3');
         bookTitle.innerText = book.title;
@@ -235,6 +235,100 @@ const dashboardPage = document.querySelector('#dashboardPage');
 if (dashboardPage || booksContainer) {
     getCurrentUser();
 }
+
+const myLoansPage = document.querySelector('#myLoansPage');
+
+if (myLoansPage) {
+    const loansContainer = document.querySelector('#loansContainer');
+
+    fetch(`${API_BASE_URL}/loans/my-loans`, {
+        method: "GET" , 
+        headers: {'Authorization': `Bearer ${token}`
+    }
+    })
+    .then((response) => {
+        return response.json();
+    })
+    
+    .then ((data) => {
+        const loans = data.data;
+        const totalLoans = loans.length;
+        const totalLoansElement = document.querySelector("#totalLoans");
+        totalLoansElement.innerText = `Total: ${totalLoans} loans`;
+
+        let activeLoansCount = 0;
+        let returnedLoansCount = 0;
+
+        for (const loan of loans) {
+
+            if (loan.status === "active") {
+                activeLoansCount++;
+
+            }
+            if (loan.status === 'returned'){
+                returnedLoansCount++;
+            }
+         const loanRow = document.createElement('tr');
+
+         const bookTitleCell = document.createElement('td');
+         bookTitleCell.innerText = loan.book.title;
+         loanRow.append(bookTitleCell);
+
+         const bookAuthorCell = document.createElement('td');
+         bookAuthorCell.innerText = loan.book.author;
+         loanRow.append(bookAuthorCell);
+
+         const loanDateCell = document.createElement('td');
+         loanDateCell.innerText = loan.loanDate;
+         loanRow.append(loanDateCell);
+
+         const loanStatusCell = document.createElement('td');
+         loanStatusCell.innerText = loan.status;
+         loanRow.append(loanStatusCell);
+
+         const loanActionCell = document.createElement("td");
+
+         if (loan.status === "active") {
+            const returnButton = document.createElement('button');
+         returnButton.innerText = "Return";
+
+         loanActionCell.append(returnButton);
+
+            returnButton.addEventListener('click', () => {
+            fetch(`${API_BASE_URL}/loans/${loan.id}/return`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+
+            })
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data);
+                if (data.success) {
+                    loanRow.remove();
+                }
+            });
+
+         });
+
+         }       
+         loanRow.append(loanActionCell);
+         loansContainer.append(loanRow);
+         
+        }
+        const activeLoansElement = document.querySelector('#activeLoansCount');
+        activeLoansElement.innerText = activeLoansCount;
+
+        const returnedLoansElement = document.querySelector('#returnedLoansCount');
+        returnedLoansElement.innerText = returnedLoansCount;
+        
+    })
+}
+
+
 
 
 
