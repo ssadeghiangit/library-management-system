@@ -30,8 +30,12 @@ function getCurrentUser() {
         }
     })
     .then((response) => {
+        if (!response.ok) {
+            throw new Error('HTTP Error');
+        }
         return response.json();
     })
+
     .then((data) => {
     
         currentUser = data.data.user;
@@ -43,18 +47,33 @@ function getCurrentUser() {
 
         const activeLoansElement = document.querySelector('#activeLoans');
         const availableBooksElement = document.querySelector("#availableBooks");
-
-        activeLoansElement.innerText = stats.activeLoans;
+        if (activeLoansElement) {
+          activeLoansElement.innerText = stats.activeLoans;
+        }
+        if (availableBooksElement) {
         availableBooksElement.innerText = stats.availableBooks;
-
+        }
+        
         const userName = document.querySelector('#userName');
         const studentName = document.querySelector('#studentName');
+        if (userName) {
+                    userName.innerText = currentUser.firstName + " " + currentUser.lastName;
 
-        userName.innerText = currentUser.firstName + " " + currentUser.lastName;
+
+        }
+        if (studentName){
         studentName.innerText = currentUser.firstName + " " + currentUser.lastName;
+
+        }
         const userAvatar = document.querySelector('#userAvatar');
+        if (userAvatar) {
         userAvatar.innerText = currentUser.firstName.charAt(0);
 
+        }
+
+    })
+    .catch((error) => {
+        console.log(error);
     })
 }
 
@@ -116,11 +135,17 @@ function getCurrentUser() {
                      body: JSON.stringify(loanData)
             })
             .then((response) => {
+                if(!response.ok){
+                    throw new Error('HTTP Error')
+                }
                 return response.json();
             })
             .then((data) => {
                 console.log(data);
                 
+            })
+            .catch((error)=> {
+                console.log(error);
             })
         
          });
@@ -176,6 +201,9 @@ function getCurrentUser() {
         "Authorization": `Bearer ${token}` }
 })
 .then((response) => {
+    if (!response.ok) {
+        throw new Error('HTTP Error');
+    }
     return response.json();
 })
 .then((data) => {
@@ -184,6 +212,9 @@ function getCurrentUser() {
     localStorage.setItem('booksTimestamp', Date.now());
    
     showBooks(books);
+})
+.catch((error)=> {
+    console.log(error);
 })
 
 
@@ -213,7 +244,10 @@ if (loginForm) {
     })
 
     .then((response) => {
-        return response.json()
+        if(!response.ok) {
+            throw new Error('HTTP Error')
+        }
+        return response.json();
     })
     .then((data) => {
          
@@ -224,7 +258,10 @@ if (loginForm) {
         if (data.token) {
             window.location = "dashboard.html";
         }
-    });
+    })
+    .catch((error)=> {
+        console.log(error);
+    })
     
 
 });
@@ -247,6 +284,9 @@ if (myLoansPage) {
     }
     })
     .then((response) => {
+        if(!response.ok) {
+            throw new Error('HTTP Error')
+        }
         return response.json();
     })
     
@@ -303,16 +343,24 @@ if (myLoansPage) {
 
             })
             .then((response) => {
+                if(!response.ok) {
+                    throw new Error('HTTP Error');
+                }
                 return response.json();
+
             })
             .then((data) => {
                 console.log(data);
                 if (data.success) {
                     loanRow.remove();
                 }
-            });
-
+            })
+            .catch((error)=> {
+            console.log(error);
          });
+
+         })
+         
 
          }       
          loanRow.append(loanActionCell);
@@ -325,6 +373,9 @@ if (myLoansPage) {
         const returnedLoansElement = document.querySelector('#returnedLoansCount');
         returnedLoansElement.innerText = returnedLoansCount;
         
+    })
+    .catch((error)=> {
+        console.log(error);
     })
 }
 
