@@ -13,11 +13,18 @@ function getToken() {
     return null;
 }
 
+function protectPage() {
+    const token = getToken();
+
+    if (!token) {
+        window.location.href = "login.html";
+    }
+}
+
 let currentUser;
 
 function getCurrentUser() {
     const token = getToken();
-
 
     if (!token) {
         return;
@@ -31,6 +38,11 @@ function getCurrentUser() {
     })
     .then((response) => {
         if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+               document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+               window.location.href = "login.html"; 
+               return;
+            }
             throw new Error('HTTP Error');
         }
         return response.json();
@@ -268,12 +280,16 @@ if (loginForm) {
 }
 
 const dashboardPage = document.querySelector('#dashboardPage');
+const myLoansPage = document.querySelector('#myLoansPage');
 
+if (dashboardPage || booksContainer || myLoansPage) {
+protectPage();
+}
 if (dashboardPage || booksContainer) {
     getCurrentUser();
 }
 
-const myLoansPage = document.querySelector('#myLoansPage');
+
 
 if (myLoansPage) {
     const loansContainer = document.querySelector('#loansContainer');
