@@ -335,6 +335,12 @@ if (myLoansPage) {
 
         let activeLoansCount = 0;
         let returnedLoansCount = 0;
+        
+        const activeLoansElement = document.querySelector('#activeLoansCount');
+        const returnedLoansElement = document.querySelector('#returnedLoansCount');
+
+        
+        
 
         for (const loan of loans) {
 
@@ -388,8 +394,28 @@ if (myLoansPage) {
             })
             .then((data) => {
                 console.log(data);
+                console.log(data.data.book);
                 if (data.success) {
                     loanRow.remove();
+
+                    activeLoansCount--;
+                    returnedLoansCount++;
+
+                    activeLoansElement.innerText = activeLoansCount
+                    returnedLoansElement.innerText = returnedLoansCount;
+
+                    const cachedBooks = JSON.parse(localStorage.getItem('books'));
+
+                    for (const book of cachedBooks) {
+                       if (book.id === data.data.book.id) {
+                        book.availableCopies++;
+                        book.available = true;
+                       }
+                    }
+                    localStorage.setItem('books', JSON.stringify(cachedBooks));
+                    localStorage.setItem('booksTimestamp', Date.now());
+
+
                 }
             })
             .catch((error)=> {
@@ -404,12 +430,8 @@ if (myLoansPage) {
          loansContainer.append(loanRow);
          
         }
-        const activeLoansElement = document.querySelector('#activeLoansCount');
-        activeLoansElement.innerText = activeLoansCount;
-
-        const returnedLoansElement = document.querySelector('#returnedLoansCount');
-        returnedLoansElement.innerText = returnedLoansCount;
         
+       
     })
     .catch((error)=> {
         console.log(error);
