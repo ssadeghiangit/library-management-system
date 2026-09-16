@@ -154,6 +154,9 @@ function getCurrentUser() {
             })
             .then((data) => {
                 console.log(data);
+
+                borrowButton.innerText = "Not Available";
+                borrowButton.disabled = true;
                 
             })
             .catch((error)=> {
