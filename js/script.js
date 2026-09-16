@@ -153,12 +153,24 @@ function getCurrentUser() {
                 return response.json();
             })
             .then((data) => {
-                console.log(data);
+              console.log(data);
+              console.log(data.loan.book);
 
-                borrowButton.innerText = "Not Available";
-                borrowButton.disabled = true;
-                
-            })
+              book.availableCopies = book.availableCopies - 1;
+              book.available = book.availableCopies > 0;
+
+              localStorage.setItem('books', JSON.stringify(books));
+              localStorage.setItem('booksTimestamp', Date.now());
+              availableCopies.innerText
+               = `Available Copies: ${book.availableCopies}`;
+
+   
+             if (!book.available) {
+              borrowButton.innerText = "Not Available";
+              borrowButton.disabled = true;
+             }
+              
+})
             .catch((error)=> {
                 console.log(error);
             })
