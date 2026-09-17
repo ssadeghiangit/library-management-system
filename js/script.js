@@ -21,72 +21,70 @@ function protectPage() {
     }
 }
 
-let currentUser;
+    let currentUser;
 
-function getCurrentUser() {
+   async function getCurrentUser() {
     const token = getToken();
 
     if (!token) {
         return;
     }
 
-    fetch(`${API_BASE_URL}/auth/me` , {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    })
-    .then((response) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
         if (!response.ok) {
             if (response.status === 401 || response.status === 403) {
-               document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-               window.location.href = "login.html"; 
-               throw new Error('Unauthorized');
+                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+                window.location.href = "login.html";
+                throw new Error('Unauthorized');
             }
+
             throw new Error('HTTP Error');
         }
-        return response.json();
-    })
 
-    .then((data) => {
-    
+        const data = await response.json();
+
         currentUser = data.data.user;
-      
-        const stats = data.data.stats;
-        
 
-        
+        const stats = data.data.stats;
 
         const activeLoansElement = document.querySelector('#activeLoans');
         const availableBooksElement = document.querySelector("#availableBooks");
+
         if (activeLoansElement) {
-          activeLoansElement.innerText = stats.activeLoans;
+            activeLoansElement.innerText = stats.activeLoans;
         }
+
         if (availableBooksElement) {
-        availableBooksElement.innerText = stats.availableBooks;
+            availableBooksElement.innerText = stats.availableBooks;
         }
-        
+
         const userName = document.querySelector('#userName');
         const studentName = document.querySelector('#studentName');
+
         if (userName) {
-                    userName.innerText = currentUser.firstName + " " + currentUser.lastName;
-
-
+            userName.innerText = currentUser.firstName + " " + currentUser.lastName;
         }
-        if (studentName){
-        studentName.innerText = currentUser.firstName + " " + currentUser.lastName;
 
+        if (studentName) {
+            studentName.innerText = currentUser.firstName + " " + currentUser.lastName;
         }
+
         const userAvatar = document.querySelector('#userAvatar');
-        if (userAvatar) {
-        userAvatar.innerText = currentUser.firstName.charAt(0);
 
+        if (userAvatar) {
+            userAvatar.innerText = currentUser.firstName.charAt(0);
         }
 
-    })
-    .catch((error) => {
+    } catch (error) {
         console.log(error);
-    })
+    }
 }
 
     const token = getToken();
@@ -234,98 +232,100 @@ buttonContainer.style.gap = '8px';
     }
 
     }
-    
-    if(booksContainer) {
-            const cachedBooks = localStorage.getItem('books');
-    const cachedTimestamp =  localStorage.getItem('booksTimestamp');
 
-    const elapsedTime = Date.now() - cachedTimestamp;
-    
-    
-    let books;
-    if (cachedBooks && elapsedTime < 5 * 60 * 1000) {
-         books = JSON.parse(cachedBooks);
-         showBooks(books);
+ async function loadBooks() {
+    const booksLoading = document.querySelector('#booksLoading');
 
-    } else {
+    try {
+        const cachedBooks = localStorage.getItem('books');
+        const cachedTimestamp = localStorage.getItem('booksTimestamp');
+        const elapsedTime = Date.now() - cachedTimestamp;
 
-        
-    fetch(`${API_BASE_URL}/books`, {
-    method: 'GET',
-    headers: {
-        "Authorization": `Bearer ${token}` }
-})
-.then((response) => {
-    if (!response.ok) {
-        throw new Error('HTTP Error');
+        let books;
+
+        if (cachedBooks && elapsedTime < 5 * 60 * 1000) {
+            books = JSON.parse(cachedBooks);
+        } else {
+            const response = await fetch(`${API_BASE_URL}/books`, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('HTTP Error');
+            }
+
+            const data = await response.json();
+
+            books = data.data;
+
+            localStorage.setItem('books', JSON.stringify(books));
+            localStorage.setItem('booksTimestamp', Date.now());
+        }
+
+        showBooks(books);
+
+    } catch (error) {
+        console.log(error);
+    } finally {
+        booksLoading.style.display = 'none';
     }
-    return response.json();
-})
-.then((data) => {
-    books = data.data;
-    localStorage.setItem('books', JSON.stringify(books));
-    localStorage.setItem('booksTimestamp', Date.now());
-   
-    showBooks(books);
-})
-.catch((error)=> {
-    console.log(error);
-})
+}
+if (booksContainer) {
+    loadBooks();
+}
 
+    
 
-    }
-
-    }
-
-const loginForm = document.querySelector('#loginForm');
-const logoutButton = document.querySelector('#logoutButton');
-if (logoutButton) {
+     const loginForm = document.querySelector('#loginForm');
+    const logoutButton = document.querySelector('#logoutButton');
+     if (logoutButton) {
     logoutButton.addEventListener('click', ()=> {
         document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/"; 
     })
 }
 
-if (loginForm) {
-    loginForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const emailInput = document.querySelector('#email');
-    const passwordInput = document.querySelector("#password");
-    const email = emailInput.value;
-    const password = passwordInput.value;
+     if (loginForm) {
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
 
-    const loginData = {
-        email: email,
-         password:password
-    };
+        const emailInput = document.querySelector('#email');
+        const passwordInput = document.querySelector("#password");
+        const email = emailInput.value;
+        const password = passwordInput.value;
 
-    fetch(`${API_BASE_URL}/auth/login`, {
-        method:"POST", headers: {
-            "Content-Type": "application/json"},
-        body: JSON.stringify(loginData)
-    })
+        const loginData = {
+            email: email,
+            password: password
+        };
 
-    .then((response) => {
-        if(!response.ok) {
-            throw new Error('HTTP Error')
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(loginData)
+            });
+
+            if (!response.ok) {
+                throw new Error('HTTP Error');
+            }
+
+            const data = await response.json();
+
+            document.cookie = `token=${data.token}; path=/`;
+
+            if (data.token) {
+                window.location = "dashboard.html";
+            }
+
+        } catch (error) {
+            console.log(error);
         }
-        return response.json();
-    })
-    .then((data) => {
-         
-        document.cookie = `token=${data.token}; path=/`;
-
-        
-
-        if (data.token) {
-            window.location = "dashboard.html";
-        }
-    })
-    .catch((error)=> {
-        console.log(error);
-    })
-    
-
-});
+    });
 }
 
 const dashboardPage = document.querySelector('#dashboardPage');
@@ -339,132 +339,139 @@ if (dashboardPage || booksContainer) {
 }
 
 
-
 if (myLoansPage) {
     const loansContainer = document.querySelector('#loansContainer');
 
-    fetch(`${API_BASE_URL}/loans/my-loans`, {
-        method: "GET" , 
-        headers: {'Authorization': `Bearer ${token}`
-    }
-    })
-    .then((response) => {
-        if(!response.ok) {
-            throw new Error('HTTP Error')
-        }
-        return response.json();
-    })
-    
-    .then ((data) => {
-        const loans = data.data;
-        const totalLoans = loans.length;
-        const totalLoansElement = document.querySelector("#totalLoans");
-        totalLoansElement.innerText = `Total: ${totalLoans} loans`;
-
-        let activeLoansCount = 0;
-        let returnedLoansCount = 0;
-
-        const activeLoansElement = document.querySelector('#activeLoansCount');
-        const returnedLoansElement = document.querySelector('#returnedLoansCount');
-
-        
-        
-
-        for (const loan of loans) {
-
-            if (loan.status === "active") {
-                activeLoansCount++;
-
-            }
-            if (loan.status === 'returned'){
-                returnedLoansCount++;
-            }
-         const loanRow = document.createElement('tr');
-
-         const bookTitleCell = document.createElement('td');
-         bookTitleCell.innerText = loan.book.title;
-         loanRow.append(bookTitleCell);
-
-         const bookAuthorCell = document.createElement('td');
-         bookAuthorCell.innerText = loan.book.author;
-         loanRow.append(bookAuthorCell);
-
-         const loanDateCell = document.createElement('td');
-         loanDateCell.innerText = loan.loanDate;
-         loanRow.append(loanDateCell);
-
-         const loanStatusCell = document.createElement('td');
-         loanStatusCell.innerText = loan.status;
-         loanRow.append(loanStatusCell);
-
-         const loanActionCell = document.createElement("td");
-
-         if (loan.status === "active") {
-            const returnButton = document.createElement('button');
-         returnButton.innerText = "Return";
-
-         loanActionCell.append(returnButton);
-
-            returnButton.addEventListener('click', () => {
-            fetch(`${API_BASE_URL}/loans/${loan.id}/return`, {
-                method: 'POST',
+    async function loadMyLoans() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/loans/my-loans`, {
+                method: "GET",
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
+            });
 
-            })
-            .then((response) => {
-                if(!response.ok) {
-                    throw new Error('HTTP Error');
+            if (!response.ok) {
+                throw new Error('HTTP Error');
+            }
+
+            const data = await response.json();
+
+            const loans = data.data;
+            const totalLoans = loans.length;
+
+            const totalLoansElement = document.querySelector("#totalLoans");
+            totalLoansElement.innerText = `Total: ${totalLoans} loans`;
+
+            let activeLoansCount = 0;
+            let returnedLoansCount = 0;
+
+            const activeLoansElement = document.querySelector('#activeLoansCount');
+            const returnedLoansElement = document.querySelector('#returnedLoansCount');
+
+            for (const loan of loans) {
+
+                if (loan.status === "active") {
+                    activeLoansCount++;
                 }
-                return response.json();
 
-            })
-            .then((data) => {
-                console.log(data);
-                console.log(data.data.book);
-                if (data.success) {
-                    loanRow.remove();
-
-                    activeLoansCount--;
+                if (loan.status === "returned") {
                     returnedLoansCount++;
-
-                    activeLoansElement.innerText = activeLoansCount
-                    returnedLoansElement.innerText = returnedLoansCount;
-
-                    const cachedBooks = JSON.parse(localStorage.getItem('books'));
-
-                    for (const book of cachedBooks) {
-                       if (book.id === data.data.book.id) {
-                        book.availableCopies++;
-                        book.available = true;
-                       }
-                    }
-                    localStorage.setItem('books', JSON.stringify(cachedBooks));
-                    localStorage.setItem('booksTimestamp', Date.now());
-
-
                 }
-            })
-            .catch((error)=> {
+
+                const loanRow = document.createElement('tr');
+
+                const bookTitleCell = document.createElement('td');
+                bookTitleCell.innerText = loan.book.title;
+                loanRow.append(bookTitleCell);
+
+                const bookAuthorCell = document.createElement('td');
+                bookAuthorCell.innerText = loan.book.author;
+                loanRow.append(bookAuthorCell);
+
+                const loanDateCell = document.createElement('td');
+                loanDateCell.innerText = loan.loanDate;
+                loanRow.append(loanDateCell);
+
+                const loanStatusCell = document.createElement('td');
+                loanStatusCell.innerText = loan.status;
+                loanRow.append(loanStatusCell);
+
+                const loanActionCell = document.createElement("td");
+
+                if (loan.status === "active") {
+                    const returnButton = document.createElement('button');
+                    returnButton.innerText = "Return";
+
+                    loanActionCell.append(returnButton);
+
+                    returnButton.addEventListener('click', () => {
+                        fetch(`${API_BASE_URL}/loans/${loan.id}/return`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        })
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error('HTTP Error');
+                            }
+
+                            return response.json();
+                        })
+                        .then((data) => {
+                            console.log(data);
+                            console.log(data.data.book);
+
+                            if (data.success) {
+                                loanRow.remove();
+
+                                activeLoansCount--;
+                                returnedLoansCount++;
+
+                                activeLoansElement.innerText = activeLoansCount;
+                                returnedLoansElement.innerText = returnedLoansCount;
+
+                                const cachedBooks = JSON.parse(
+                                    localStorage.getItem('books')
+                                );
+
+                                for (const book of cachedBooks) {
+                                    if (book.id === data.data.book.id) {
+                                        book.availableCopies++;
+                                        book.available = true;
+                                    }
+                                }
+
+                                localStorage.setItem(
+                                    'books',
+                                    JSON.stringify(cachedBooks)
+                                );
+
+                                localStorage.setItem(
+                                    'booksTimestamp',
+                                    Date.now()
+                                );
+                            }
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+                    });
+                }
+
+                loanRow.append(loanActionCell);
+                loansContainer.append(loanRow);
+            }
+
+        } catch (error) {
             console.log(error);
-         });
-
-         })
-         
-
-         }       
-         loanRow.append(loanActionCell);
-         loansContainer.append(loanRow);
-         
         }
-        
-       
-    })
-    .catch((error)=> {
-        console.log(error);
-    })
+    }
+
+    loadMyLoans();
 }
+
 
 
 
