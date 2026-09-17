@@ -41,7 +41,7 @@ function getCurrentUser() {
             if (response.status === 401 || response.status === 403) {
                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
                window.location.href = "login.html"; 
-               return;
+               throw new Error('Unauthorized');
             }
             throw new Error('HTTP Error');
         }
@@ -100,29 +100,48 @@ function getCurrentUser() {
 
         bookCard.classList.add('card');
        
+        const titleRow = document.createElement('div');
+        titleRow.style.display = 'flex';
+        titleRow.style.justifyContent = 'space-between';
+        titleRow.style.alignItems = 'flex-start';
+        titleRow.style.width = '100%';
 
         const bookTitle = document.createElement('h3');
         bookTitle.innerText = book.title;
-        bookCard.append(bookTitle);
+       
+
+        const status = document.createElement('span');
+        status.classList.add(
+        'status', book.available ? 'status-available' : 'status-unavailable');
+          status.innerText = book.available ? 'Available' : 'Unavailable';
+      
+          titleRow.append(bookTitle);
+          titleRow.append(status);
+          bookCard.append(titleRow);
+        
 
         const bookAuthor = document.createElement('p');
-        bookAuthor.innerText= book.author;
+        bookAuthor.innerHTML = `<strong>Author:</strong> ${book.author}`;
         bookCard.append(bookAuthor);
         
         const bookIsbn = document.createElement('p');
-        bookIsbn.innerText = book.isbn;
+        bookIsbn.innerHTML = `<strong>ISBN</strong>: ${book.isbn}`;
         bookCard.append(bookIsbn);
 
         const bookCategory = document.createElement('p');
-        bookCategory.innerText = `Category: ${book.category.name}`;
+        bookCategory.innerHTML = `<strong>Category</strong>: ${book.category.name}`;
         bookCard.append(bookCategory);
 
         const availableCopies = document.createElement('p');
-        availableCopies.innerText = `Available Copies: ${book.availableCopies}`;
+        availableCopies.innerHTML = `<strong>Available Copies</strong>: ${book.availableCopies}`;
         bookCard.append(availableCopies);
 
-       
+       const buttonContainer = document.createElement('div');
+buttonContainer.style.display = 'flex';
+buttonContainer.style.gap = '8px';
+
         const borrowButton = document.createElement('button');
+        borrowButton.classList.add('btn', 'btn-primary', 'btn-sm');
 
         if (book.available === true) {
         borrowButton.innerText ='Borrow Book';
@@ -130,7 +149,7 @@ function getCurrentUser() {
             borrowButton.innerText = "Not Available";
             borrowButton.disabled = true;
          }
-         bookCard.append(borrowButton);
+         
 
          borrowButton.addEventListener('click', () => {
             
@@ -168,6 +187,10 @@ function getCurrentUser() {
              if (!book.available) {
               borrowButton.innerText = "Not Available";
               borrowButton.disabled = true;
+
+              status.innerText = "Unavailable";
+              status.classList.remove('status-available');
+              status.classList.add('status-unavailable');
              }
               
 })
@@ -179,9 +202,14 @@ function getCurrentUser() {
 
          const detailsButton= document.createElement('button');
          detailsButton.innerText = "View Details"
-         bookCard.append(detailsButton);
+         detailsButton.classList.add('btn', 'btn-secondary', 'btn-sm');
+         
+         buttonContainer.append(borrowButton);
+         buttonContainer.append(detailsButton);
+         bookCard.append(buttonContainer);
 
          detailsButton.addEventListener('click', () => {
+            detailsButton.disabled = true;
             const bookDescription = document.createElement('p');
             bookDescription.innerText = book.description;
             bookCard.append(bookDescription);
@@ -335,7 +363,7 @@ if (myLoansPage) {
 
         let activeLoansCount = 0;
         let returnedLoansCount = 0;
-        
+
         const activeLoansElement = document.querySelector('#activeLoansCount');
         const returnedLoansElement = document.querySelector('#returnedLoansCount');
 
