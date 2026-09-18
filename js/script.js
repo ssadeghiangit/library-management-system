@@ -343,6 +343,7 @@ if (myLoansPage) {
     const loansContainer = document.querySelector('#loansContainer');
 
     async function loadMyLoans() {
+        const loansLoading = document.querySelector('#loansLoading');
         try {
             const response = await fetch(`${API_BASE_URL}/loans/my-loans`, {
                 method: "GET",
@@ -466,6 +467,8 @@ if (myLoansPage) {
 
         } catch (error) {
             console.log(error);
+        } finally {
+            loansLoading.style.display = 'none';
         }
     }
 

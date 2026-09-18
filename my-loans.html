@@ -16,7 +16,7 @@
                     <a href="dashboard.html">Dashboard</a>
                     <a href="books.html">Browse Books</a>
                     <a href="my-loans.html" class="active">My Loans</a>
-                    <a href="login.html">Logout</a>
+                    <a href="login.html" id="logoutButton">Logout</a>
                 </nav>
                 <div class="user-info">
                     <div class="user-avatar">S</div>
@@ -50,6 +50,9 @@
                         </tr>
                     </thead>
                     <tbody id='loansContainer'>
+                        <tr>
+                            <td colspan="5" id="loansLoading">Loading loans...</td>
+                        </tr>
                        
                     </tbody>
                 </table>
