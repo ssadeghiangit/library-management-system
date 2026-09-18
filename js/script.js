@@ -218,8 +218,6 @@ buttonContainer.style.gap = '8px';
             publisher.innerText = `Publisher: ${book.publisher}`;
             bookCard.append(publisher);
 
-
-          
          })
 
 
@@ -322,7 +320,8 @@ if (booksContainer) {
             }
 
         } catch (error) {
-            console.log(error);
+             const alertContainer = document.querySelector('#alert-container');
+              alertContainer.innerText = 'Login failed. Please check your email and password.';
         }
     });
 }
