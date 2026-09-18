@@ -170,9 +170,7 @@ buttonContainer.style.gap = '8px';
                 return response.json();
             })
             .then((data) => {
-              console.log(data);
-              console.log(data.loan.book);
-
+             
               book.availableCopies = book.availableCopies - 1;
               book.available = book.availableCopies > 0;
 
@@ -221,8 +219,7 @@ buttonContainer.style.gap = '8px';
             bookCard.append(publisher);
 
 
-            console.log(book.description);
-            console.log(book);
+          
          })
 
 
@@ -239,11 +236,13 @@ buttonContainer.style.gap = '8px';
     try {
         const cachedBooks = localStorage.getItem('books');
         const cachedTimestamp = localStorage.getItem('booksTimestamp');
-        const elapsedTime = Date.now() - cachedTimestamp;
+        
 
         let books;
 
-        if (cachedBooks && elapsedTime < 5 * 60 * 1000) {
+        if (  cachedBooks &&
+            cachedTimestamp &&
+            Date.now() - Number(cachedTimestamp) < 5 * 60 * 1000 ) {
             books = JSON.parse(cachedBooks);
         } else {
             const response = await fetch(`${API_BASE_URL}/books`, {
@@ -434,7 +433,7 @@ if (myLoansPage) {
                                 returnedLoansElement.innerText = returnedLoansCount;
 
                                 const cachedBooks = JSON.parse(
-                                    localStorage.getItem('books')
+                                    localStorage.getItem('books') || '[]'
                                 );
 
                                 for (const book of cachedBooks) {
