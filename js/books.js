@@ -173,26 +173,68 @@ async function showBooks(books) {
         buttonContainer.append(detailsButton);
         bookCard.append(buttonContainer);
 
-        detailsButton.addEventListener('click', () => {
-            detailsButton.disabled = true;
+    detailsButton.addEventListener('click', () => {
+    const modal = document.querySelector('#bookDetailsModal');
 
-            const bookDescription = document.createElement('p');
-            bookDescription.innerText = book.description;
-            bookCard.append(bookDescription);
+    document.querySelector('#modalBookTitle').textContent =
+        book.title;
 
-            const publicationYear = document.createElement('p');
-            publicationYear.innerText =
-                `Publication Year: ${book.publicationYear}`;
-            bookCard.append(publicationYear);
+    document.querySelector('#modalBookAuthor').textContent =
+        `Author: ${book.author}`;
 
-            const publisher = document.createElement('p');
-            publisher.innerText = `Publisher: ${book.publisher}`;
-            bookCard.append(publisher);
-        });
+    document.querySelector('#modalBookIsbn').textContent =
+        `ISBN: ${book.isbn}`;
+
+    document.querySelector('#modalBookCategory').textContent =
+        `Category: ${book.category.name}`;
+
+    document.querySelector('#modalBookCopies').textContent =
+        `Available Copies: ${book.availableCopies}`;
+
+    document.querySelector('#modalBookYear').textContent =
+        `Publication Year: ${book.publicationYear}`;
+
+    document.querySelector('#modalBookPublisher').textContent =
+        `Publisher: ${book.publisher}`;
+
+    document.querySelector('#modalBookDescription').textContent =
+        book.description || 'No description available.';
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+});
 
         booksContainer.append(bookCard);
     }
 }
 if (booksContainer) {
     loadBooks();
+}
+const bookDetailsModal = document.querySelector('#bookDetailsModal');
+
+if (bookDetailsModal) {
+    bookDetailsModal.addEventListener('click', (event) => {
+        if (event.target.closest('[data-close-modal]')) {
+            closeBookDetailsModal();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeBookDetailsModal();
+        }
+    });
+}
+
+function closeBookDetailsModal() {
+    const modal = document.querySelector('#bookDetailsModal');
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
 }
