@@ -45,11 +45,21 @@ async function loadBooks() {
 
         await showBooks(books);
 
-    } catch (error) {
-        console.log(error);
-    } finally {
+   } catch (error) {
+    console.error("Failed to load books:", error);
+
+    const errorMessage = document.querySelector('#booksError');
+
+    if (errorMessage) {
+        errorMessage.textContent =
+            "Failed to load books. Please try again.";
+        errorMessage.style.display = 'block';
+    }
+} finally {
+    if (booksLoading) {
         booksLoading.style.display = 'none';
     }
+}
 }
 
 async function showBooks(books) {
@@ -88,21 +98,51 @@ async function showBooks(books) {
         bookCard.append(titleRow);
 
         const bookAuthor = document.createElement('p');
-        bookAuthor.innerHTML = `<strong>Author:</strong> ${book.author}`;
-        bookCard.append(bookAuthor);
 
-        const bookIsbn = document.createElement('p');
-        bookIsbn.innerHTML = `<strong>ISBN</strong>: ${book.isbn}`;
-        bookCard.append(bookIsbn);
+        const authorLabel = document.createElement('strong');
+        authorLabel.textContent = 'Author: ';
 
-        const bookCategory = document.createElement('p');
-        bookCategory.innerHTML = `<strong>Category</strong>: ${book.category.name}`;
-        bookCard.append(bookCategory);
+         bookAuthor.append(
+            authorLabel,
+             document.createTextNode(book.author)
+            );  
+             bookCard.append(bookAuthor);
 
-        const availableCopies = document.createElement('p');
-        availableCopies.innerHTML =
-            `<strong>Available Copies</strong>: ${book.availableCopies}`;
-        bookCard.append(availableCopies);
+    const bookIsbn = document.createElement('p');
+
+    const isbnLabel = document.createElement('strong');
+    isbnLabel.textContent = 'ISBN: ';
+
+     bookIsbn.append(
+    isbnLabel,
+    document.createTextNode(book.isbn));
+
+    bookCard.append(bookIsbn);
+
+
+      const bookCategory = document.createElement('p');
+
+      const categoryLabel = document.createElement('strong');
+      categoryLabel.textContent = 'Category: ';
+
+     bookCategory.append(
+    categoryLabel,
+    document.createTextNode(book.category.name)
+);
+
+     bookCard.append(bookCategory);
+
+
+    const availableCopies = document.createElement('p');
+
+    const availableCopiesLabel = document.createElement('strong');
+    availableCopiesLabel.textContent = 'Available Copies: ';
+
+    availableCopies.append(
+    availableCopiesLabel,
+    document.createTextNode(String(book.availableCopies)));
+
+     bookCard.append(availableCopies);
 
         const buttonContainer = document.createElement('div');
         buttonContainer.style.display = 'flex';

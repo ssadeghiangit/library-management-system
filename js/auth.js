@@ -53,9 +53,11 @@ async function getCurrentUser() {
         return data.data;
 
     } catch (error) {
-        console.log(error);
-    }
+    console.error("Failed to get current user:", error);
+    throw error;
 }
+}
+
 const loginForm = document.querySelector('#loginForm');
 
 if (loginForm) {

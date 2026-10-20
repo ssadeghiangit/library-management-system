@@ -8,6 +8,8 @@ if (dashboardPage) {
 }
 
 async function loadDashboard() {
+
+    try {
     const data = await getCurrentUser();
 
     if (!data) {
@@ -44,4 +46,18 @@ async function loadDashboard() {
     if (userAvatar) {
         userAvatar.innerText = currentUser.firstName.charAt(0);
     }
+
+}
+catch (error) {
+        console.error("Failed to load dashboard:", error);
+
+        const errorMessage = document.querySelector('#dashboardError');
+
+        if (errorMessage) {
+            errorMessage.textContent =
+                "Failed to load dashboard data. Please try again.";
+            errorMessage.style.display = 'block';
+        }
+    }
+
 }

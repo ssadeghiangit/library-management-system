@@ -32,16 +32,18 @@
             <p style="color: #666; margin-bottom: 2rem;">Explore our collection and find your next read.</p>
             
 
-            <!-- Books Grid -->
-            <div class="grid grid-3" id="booksContainer">
-                <div id="booksLoading">Loading books...</div>
-              
-            </div>
+            
+           <div id="booksLoading">Loading books...</div>
 
-        </div>
-    </main>
-    <div class="modal" id="bookDetailsModal" aria-hidden="true">
-    <div class="modal__overlay" data-close-modal></div>
+         <p id="booksError" role="alert" style="display: none;"></p>
+
+
+         <div class="grid grid-3" id="booksContainer"></div>
+
+         </div>
+       </main>
+     <div class="modal" id="bookDetailsModal" aria-hidden="true">
+     <div class="modal__overlay" data-close-modal></div>
 
     <section
         class="modal__content"
